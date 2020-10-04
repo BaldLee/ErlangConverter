@@ -1,0 +1,4 @@
+.vscode
+examples/*.core
+examples/*.beam
+example.py
