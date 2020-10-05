@@ -278,3 +278,112 @@ def p_functiondefine(p):
     'functiondefine : afunctionname = afun'
     # wait
     pass
+
+
+def p_afunctionname_notannotated(p):
+    'afunctionname : functionname'
+    p[0] = p[1]
+
+
+def p_afunctionname_annotated(p):
+    'afunctionname : LPAREN functionname ANNOTATION LBRACK constants RBACK RPAREN'
+    p[0] = p[2]
+
+
+def p_afun_notannotated(p):
+    'afun : fun'
+    p[0] = p[1]
+
+
+def p_afun_annotated(p):
+    'afun : LPAREN fun ANNOTATION LBRACK constants RBRACK RPAREN'
+    p[0] = p[2]
+
+
+def p_expression_vlist(p):
+    'expression : valuelist'
+    pass  # wait
+
+
+def p_expression_singleexpression(p):
+    'expression : singleexpression'
+    pass  # wait
+
+
+def p_valuelist(p):
+    'valuelist : LABRACK singleexpressions RABRACK'
+    pass  # wait
+
+
+def p_singleexpressions_one(p):
+    'singleexpressions : singleexpression'
+    pass  # wait
+
+
+def p_singleexpressions_combine(p):
+    'singleexpressions : singleexpressions COMMA singleexpression'
+    pass  # wait
+
+
+def p_singleexpression_atomicliteral(p):
+    'singleexpression : atomliteral'
+    pass  # wait
+
+
+def p_singleexpression_varname(p):
+    'singleexpression : VARNAME'
+    pass  # wait
+
+
+def p_singleexpression_functionname(p):
+    'singleexpression : functionname'
+    pass  # wait
+
+
+def p_singleexpression_tuple(p):
+    'singleexpression : tuple'
+    pass  # wait
+
+
+def p_singleexpression_list(p):
+    'singleexpression : list'
+    pass  # wait
+
+
+def p_singleexpression_let(p):
+    'singleexpression : let'
+    pass  # wait
+
+
+def p_singleexpression_case(p):
+    'singleexpression : case'
+    pass  # wait
+
+
+def p_singleexpression_fun(p):
+    'singleexpression : fun'
+    pass  # wait
+
+
+def p_singleexpression_application(p):
+    'singleexpression : application'
+    pass  # wait
+
+
+def p_singleexpression_receive(p):
+    'singleexpression : receive'
+    pass  # wait
+
+
+def p_var_varname(p):
+    'var : VARNAME'
+    pass  # wait
+
+
+def p_var_varlist(p):
+    'var : LRBRACK varnames RABRACK'
+    pass  # wait
+
+def p_var_empty(p):
+    'var : LRABRACK RABRACK'
+    pass # wait
