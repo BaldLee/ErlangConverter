@@ -71,7 +71,7 @@ tokens = [
     # 'LETREC',
     'MODULE',
     'OF',
-    # 'PRIMOP',
+    'PRIMOP',
     'RECEIVE',
     # 'TRY',
     'WHEN'
@@ -80,7 +80,7 @@ tokens = [
 t_ATOM = r'\'[^\\^\']*\''
 t_CHAR = r'\$[A-Za-z0-9_@]'
 t_STRING = r'\"[A-Za-z0-9_@\s]*\"'
-t_VARNAME = r'[A-Z_][A-Za-z0-9@_]*'
+t_VARNAME = r'([A-Z]|_[A-Za-z0-9@_])[A-Za-z0-9@_]*'
 
 
 # def t_VARNAME(t):
@@ -130,7 +130,7 @@ t_LET = r'let'
 # t_LETREC = r'letrec'
 t_MODULE = r'module'
 t_OF = r'of'
-# t_PRIMOP = r'primop'
+t_PRIMOP = r'primop'
 t_RECEIVE = r'receive'
 # t_TRY = r'try'
 t_WHEN = r'when'
@@ -382,6 +382,7 @@ def p_asingleexpression_se(p):
 def p_asingleexpression_annotation(p):
     'asingleexpression : LPAREN singleexpression ANNOTATION LBRACK constants RBRACK RPAREN'
 
+
 def p_expressions_once(P):
     'expressions : expression'
     pass  # wait
@@ -472,6 +473,11 @@ def p_singleexpression_sequencing(p):
     pass  # wait
 
 
+def p_singleexpression_primop(p):
+    'singleexpression : primop'
+    pass  # wait
+
+
 def p_vars_avarname(p):
     'vars : avarname'
     pass  # wait
@@ -487,7 +493,12 @@ def p_vars_empty(p):
     pass  # wait
 
 
-def p_tuple_empty(p):  # maybe conflict to empty constent
+def p_tuple_notempty(p):
+    'tuple : LBRACE expressions RBRACE'
+    pass  # wait
+
+
+def p_tuple_empty(p):
     'tuple : LBRACE RBRACE'
     pass  # wait
 
@@ -503,7 +514,7 @@ def p_list_nobar(p):
 
 
 def p_list_withbar(p):
-    'list : LBRACK expressions VBAR RBRACK'
+    'list : LBRACK expressions VBAR expression RBRACK'
     pass  # wait
 
 
@@ -572,6 +583,11 @@ def p_avarname_varname(p):
     pass  # wait
 
 
+def p_avername_annotation(p):
+    'avarname : LPAREN VARNAME ANNOTATION LBRACK constants RBRACK RPAREN'
+    pass  # wait
+
+
 def p_avarnames_once(p):
     'avarnames : avarname'
     pass  # wait
@@ -617,9 +633,13 @@ def p_guard(p):
     pass  # wait
 
 
-def p_aclause(p):
+def p_aclause_noa(p):
     'aclause : clause'
     pass  # wait
+
+
+def p_aclause_witha(p):
+    'aclause : LPAREN clause ANNOTATION LBRACK constants RBRACK RPAREN'
 
 
 def p_case(p):
@@ -662,22 +682,32 @@ def p_seq(p):
     pass  # wait
 
 
+def p_primop_notempty(p):
+    'primop : PRIMOP ATOM LPAREN expressions RPAREN'
+    pass  # wait
+
+
+def p_primop_empty(p):
+    'primop : PRIMOP ATOM LPAREN RPAREN'
+    pass  # wait
+
+
 parser = yacc.yacc()
 
-str = "examples/concdb.core"
-str = "examples/finite_leader.core"
-str = "examples/firewall.core"
-str = "examples/howait.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
-str = "examples/concdb.core"
+# str = "examples/concdb.core"
+# str = "examples/finite_leader.core"
+# str = "examples/firewall.core"
+# str = "examples/howait.core"
+# str = "examples/parikh.core"
+# str = "examples/pipe.core"
+# str = "examples/race.core"
+# str = "examples/reslock.core"
+# str = "examples/ring.core"
+# str = "examples/safe_send.core"
+# str = "examples/sieve.core"
+# str = "examples/state_factory.core"
+# str = "examples/stutter.core"
+str = "examples/unsafe_send.core"
 filein = open(str)
 data = filein.read()
 result = parser.parse(data, lexer=lexer)
