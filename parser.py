@@ -45,42 +45,48 @@ tokens = [
     'LABRACK',
     'RABRACK',
     'VBAR',
-    'NSIGN',
+    # 'NSIGN',
     'COMMA',
     'COLON',
     'SLASH',
     'EQUAL',
     'ARROW',
     'ANNOTATION',
-    'PLUS',
-    'MINUS',
-    'MULTI',
-    'EXCLAIM',
-    'APO',
+    # 'PLUS',
+    # 'MINUS',
+    # 'MULTI',
+    # 'EXCLAIM',
+    # 'APO',
     'AFTER',
     'APPLY',
     'ATTRIBUTES',
     'CALL',
     'CASE',
-    'CATCH',
+    # 'CATCH',
     'DO',
     'END',
     'FUN',
     'IN',
     'LET',
-    'LETREC',
+    # 'LETREC',
     'MODULE',
     'OF',
-    'PRIMOP',
+    # 'PRIMOP',
     'RECEIVE',
-    'TRY',
+    # 'TRY',
     'WHEN'
 ]
 
-t_ATOM = r'\'[A-Za-z0-9_@\s]*\''
+t_ATOM = r'\'[^\\^\']*\''
 t_CHAR = r'\$[A-Za-z0-9_@]'
 t_STRING = r'\"[A-Za-z0-9_@\s]*\"'
 t_VARNAME = r'[A-Z_][A-Za-z0-9@_]*'
+
+
+# def t_VARNAME(t):
+#     r'[A-Z_][A-Za-z0-9@_]*'
+#     t.type = reserved.get(t.value, 'VARNAME')  # cheack reserved words
+#     return t
 
 
 def t_NUMBER(t):  # numbers
@@ -98,34 +104,35 @@ t_RBRACE = r'\}'
 t_LABRACK = r'<'
 t_RABRACK = r'>'
 t_VBAR = r'\|'
-t_NSIGN = r'\#'
+# t_NSIGN = r'\#'
 t_COMMA = r','
 t_COLON = r':'
 t_SLASH = r'/'
 t_EQUAL = r'='
 t_ARROW = r'->'
 t_ANNOTATION = r'-\|'
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_MULTI = r'\*'
-t_EXCLAIM = r'\!'
-t_APO = r'\''
+# t_PLUS = r'\+'
+# t_MINUS = r'-'
+# t_MULTI = r'\*'
+# t_EXCLAIM = r'\!'
+# t_APO = r'\''
 t_AFTER = r'after'
 t_APPLY = r'apply'
 t_ATTRIBUTES = r'attributes'
 t_CALL = r'call'
 t_CASE = r'case'
+# t_CATCH = r'catch'
 t_DO = r'do'
 t_END = r'end'
 t_FUN = r'fun'
 t_IN = r'in'
 t_LET = r'let'
-t_LETREC = r'letrec'
+# t_LETREC = r'letrec'
 t_MODULE = r'module'
 t_OF = r'of'
-t_PRIMOP = r'primop'
+# t_PRIMOP = r'primop'
 t_RECEIVE = r'receive'
-t_TRY = r'try'
+# t_TRY = r'try'
 t_WHEN = r'when'
 
 
@@ -143,7 +150,7 @@ def t_COMMENT(t):  # No return value. Token discarded
 
 
 def t_error(t):  # Error handler
-    print("Illegal character '%s'. LINE %d " % (t.value[0],t.lexer.lineno))
+    print("Illegal character '%s'. LINE %d " % (t.value[0], t.lexer.lineno))
     t.lexer.skip(1)
 
 
@@ -362,10 +369,18 @@ def p_expression_vlist(p):
     pass  # wait
 
 
-def p_expression_singleexpression(p):
-    'expression : singleexpression'
+def p_expression_asingleexpression(p):
+    'expression : asingleexpression'
     pass  # wait
 
+
+def p_asingleexpression_se(p):
+    'asingleexpression : singleexpression'
+    pass  # wait
+
+
+def p_asingleexpression_annotation(p):
+    'asingleexpression : LPAREN singleexpression ANNOTATION LBRACK constants RBRACK RPAREN'
 
 def p_expressions_once(P):
     'expressions : expression'
@@ -373,22 +388,27 @@ def p_expressions_once(P):
 
 
 def p_expressions_combine(p):
-    'expressions : expression COMMA expression'
+    'expressions : expressions COMMA expression'
     pass  # wait
 
 
-def p_valuelist(p):
-    'valuelist : LABRACK singleexpressions RABRACK'
+def p_valuelist_notempty(p):
+    'valuelist : LABRACK asingleexpressions RABRACK'
     pass  # wait
 
 
-def p_singleexpressions_one(p):
-    'singleexpressions : singleexpression'
+def p_valuelist_empty(p):
+    'valuelist : LABRACK RBRACK'
     pass  # wait
 
 
-def p_singleexpressions_combine(p):
-    'singleexpressions : singleexpressions COMMA singleexpression'
+def p_asingleexpressions_one(p):
+    'asingleexpressions : asingleexpression'
+    pass  # wait
+
+
+def p_asingleexpressions_combine(p):
+    'asingleexpressions : asingleexpressions COMMA asingleexpression'
     pass  # wait
 
 
@@ -442,6 +462,16 @@ def p_singleexpression_receive(p):
     pass  # wait
 
 
+def p_singleexpression_call(p):
+    'singleexpression : call'
+    pass  # wait
+
+
+def p_singleexpression_sequencing(p):
+    'singleexpression : seq'
+    pass  # wait
+
+
 def p_vars_avarname(p):
     'vars : avarname'
     pass  # wait
@@ -477,8 +507,13 @@ def p_list_withbar(p):
     pass  # wait
 
 
-def p_application(p):
+def p_application_notempty(p):
     'application : APPLY expression LPAREN expressions RPAREN'
+    pass  # wait
+
+
+def p_application_empty(p):
+    'application : APPLY expression LPAREN RPAREN'
     pass  # wait
 
 
@@ -612,8 +647,37 @@ def p_timeout(p):
     pass  # wait
 
 
+def p_call_notempty(p):
+    'call : CALL expression COLON expression LPAREN expressions RPAREN'
+    pass  # wait
+
+
+def p_call_empty(p):
+    'call : CALL expression COLON expression LPAREN RPAREN'
+    pass  # wait
+
+
+def p_seq(p):
+    'seq : DO expression expression'
+    pass  # wait
+
+
 parser = yacc.yacc()
 
-filein = open("examples/pipe.core")
+str = "examples/concdb.core"
+str = "examples/finite_leader.core"
+str = "examples/firewall.core"
+str = "examples/howait.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+str = "examples/concdb.core"
+filein = open(str)
 data = filein.read()
 result = parser.parse(data, lexer=lexer)
