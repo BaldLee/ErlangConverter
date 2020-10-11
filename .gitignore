@@ -2,3 +2,4 @@
 examples/*.core
 examples/*.beam
 example.py
+__pycache__
