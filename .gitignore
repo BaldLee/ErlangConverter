@@ -1,5 +1,6 @@
 .vscode
+__pycache__
 examples/*.core
 examples/*.beam
 example.py
-__pycache__
+test.py

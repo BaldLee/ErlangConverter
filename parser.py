@@ -187,6 +187,34 @@ def p_exports(p):
     # wait
     pass
 
+
+def p_moduleattribute(p):
+    'moduleattribute : ATOM EQUAL constant'
+    # wait
+    pass
+
+
+def p_moduleattributes_one(p):
+    'moduleattributes : moduleattribute'
+    # wait
+    pass
+
+
+def p_moduleattributes_combine(p):
+    'moduleattributes : moduleattributes COMMA moduleattribute'
+    # wait
+    pass
+
+
+def p_modulebody(p):
+    'modulebody : functiondefines'
+    for fun in p[1]:
+        fn = fun.function_name
+        if "\'module_info\'" != fn.name:
+            print(fn.name + " " + str(fn.lineno))
+            local_functions.append(fn)
+    pass
+
 # Atomic literal: integer, atom, nil, char and string
 
 
@@ -274,22 +302,22 @@ def p_constants_combine(p):
 
 def p_functionname(p):
     'functionname : ATOM SLASH NUMBER'
-    # p[0] = FunctionName(p[1], p[3])
-    pass  # wait
+    p[0] = FunctionName(p[1], p[3], p.lexer.lineno)
+    pass
 
 
 def p_functionnames_one(p):
     'functionnames : functionname'
-    # p[0] = []
-    # p[0].append(p[1])
-    pass  # wait
+    p[0] = []
+    p[0].append(p[1])
+    pass
 
 
 def p_functionnames_combine(p):
     'functionnames : functionnames COMMA functionname'
-    # p[0] = p[1]
-    # p[0].append(p[3])
-    pass  # wait
+    p[0] = p[1]
+    p[0].append(p[3])
+    pass
 
 
 def p_attributes(p):
@@ -298,58 +326,32 @@ def p_attributes(p):
     pass
 
 
-def p_moduleattribute(p):
-    'moduleattribute : ATOM EQUAL constant'
-    # wait
-    pass
-
-
-def p_moduleattributes_one(p):
-    'moduleattributes : moduleattribute'
-    # wait
-    pass
-
-
-def p_moduleattributes_combine(p):
-    'moduleattributes : moduleattributes COMMA moduleattribute'
-    # wait
-    pass
-
-
-def p_modulebody(p):
-    'modulebody : functiondefines'
-    # wait
-    pass
-
-
 def p_functiondefines_one(p):
     'functiondefines : functiondefine'
-    # wait
-    pass
+    p[0] = []
+    p[0].append(p[1])
 
 
 def p_functiondefines_combine(p):
     'functiondefines : functiondefines functiondefine'
-    # wait
+    p[0] = p[1]
+    p[0].append(p[2])
     pass
 
 
 def p_functiondefine(p):
     'functiondefine : afunctionname EQUAL afun'
-    # wait
-    pass
+    p[0] = FunctionDefine(p[1])
 
 
 def p_afunctionname_notannotated(p):
     'afunctionname : functionname'
-    # p[0] = p[1]
-    pass  # wait
+    p[0] = p[1]
 
 
 def p_afunctionname_annotated(p):
     'afunctionname : LPAREN functionname ANNOTATION LBRACK constants RBRACK RPAREN'
-    # p[0] = p[2]
-    pass  # wait
+    p[0] = p[2]
 
 
 def p_afun_notannotated(p):
@@ -366,31 +368,34 @@ def p_afun_annotated(p):
 
 def p_expression_vlist(p):
     'expression : valuelist'
-    pass  # wait
+    p[0] = Expression(ExpressionKind.VALUELIST, p[1])
 
 
 def p_expression_asingleexpression(p):
     'expression : asingleexpression'
-    pass  # wait
+    p[0] = Expression(ExpressionKind.SINGLE, p[1])
 
 
 def p_asingleexpression_se(p):
     'asingleexpression : singleexpression'
-    pass  # wait
+    p[0] = p[1]
 
 
 def p_asingleexpression_annotation(p):
     'asingleexpression : LPAREN singleexpression ANNOTATION LBRACK constants RBRACK RPAREN'
+    p[0] = p[2]
 
 
-def p_expressions_once(P):
+def p_expressions_once(p):
     'expressions : expression'
-    pass  # wait
+    p[0] = []
+    p[0].append(p[1])
 
 
 def p_expressions_combine(p):
     'expressions : expressions COMMA expression'
-    pass  # wait
+    p[0] = p[1]
+    p[0].append(p[3])
 
 
 def p_valuelist_notempty(p):
@@ -415,82 +420,83 @@ def p_asingleexpressions_combine(p):
 
 def p_singleexpression_atomicliteral(p):
     'singleexpression : atomliteral'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.ATOMICLITERAL, p[1])
 
 
 def p_singleexpression_varname(p):
     'singleexpression : VARNAME'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.VARNAME, p[1])
 
 
 def p_singleexpression_functionname(p):
     'singleexpression : functionname'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.FUNCTIONNAME, p[1])
 
 
 def p_singleexpression_tuple(p):
     'singleexpression : tuple'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.TUPLE, p[1])
 
 
 def p_singleexpression_list(p):
     'singleexpression : list'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.LIST, p[1])
 
 
 def p_singleexpression_let(p):
     'singleexpression : let'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.LET, p[1])
 
 
 def p_singleexpression_case(p):
     'singleexpression : case'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.CASE, p[1])
 
 
 def p_singleexpression_fun(p):
     'singleexpression : fun'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.FUN, p[1])
 
 
 def p_singleexpression_application(p):
     'singleexpression : application'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.APPLICATION, p[1])
 
 
 def p_singleexpression_receive(p):
     'singleexpression : receive'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.RECEIVE, p[1])
 
 
 def p_singleexpression_call(p):
     'singleexpression : call'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.CALL, p[1])
 
 
 def p_singleexpression_sequencing(p):
     'singleexpression : seq'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.SEQ, p[1])
 
 
 def p_singleexpression_primop(p):
     'singleexpression : primop'
-    pass  # wait
+    p[0] = SingleExpression(SingleExpressionKind.PRIMOP, p[1])
 
 
 def p_vars_avarname(p):
     'vars : avarname'
-    pass  # wait
+    p[0] = []
+    p[0].append(p[1])
 
 
 def p_vars_varlist(p):
     'vars : LABRACK avarnames RABRACK'
-    pass  # wait
+    p[0] = p[2]
 
 
 def p_vars_empty(p):
     'vars : LABRACK RABRACK'
-    pass  # wait
+    p[0] = []
 
 
 def p_tuple_notempty(p):
@@ -505,8 +511,14 @@ def p_tuple_empty(p):
 
 def p_let(p):
     'let : LET vars EQUAL expression IN expression'
-    pass  # wait
-
+    # gvt.begin_scope()
+    # if len(p[2]) > 1:
+    #     print("error: more than one var in let")
+    # varname = p[2][0]
+    # gvt.cur_var_table[varname] = Variable(varname, p[4], False)
+    # do_expression(p[6])
+    # gvt.end_scope()
+    pass
 
 def p_list_nobar(p):
     'list : LBRACK expressions RBRACK'
@@ -580,22 +592,24 @@ def p_pattern_varname(p):
 
 def p_avarname_varname(p):
     'avarname : VARNAME'
-    pass  # wait
+    p[0] = p[1]
 
 
 def p_avername_annotation(p):
     'avarname : LPAREN VARNAME ANNOTATION LBRACK constants RBRACK RPAREN'
-    pass  # wait
+    p[0] = p[2]
 
 
 def p_avarnames_once(p):
     'avarnames : avarname'
-    pass  # wait
+    p[0] = []
+    p[0].append(p[1])
 
 
 def p_avarnames_combine(p):
     'avarnames : avarnames COMMA avarname'
-    pass  # wait
+    p[0] = p[1]
+    p[0].append(p[3])
 
 
 def p_apatterns_once(p):
@@ -669,12 +683,12 @@ def p_timeout(p):
 
 def p_call_notempty(p):
     'call : CALL expression COLON expression LPAREN expressions RPAREN'
-    pass  # wait
+    p[0] = Call(p[2], p[4], p[6])
 
 
 def p_call_empty(p):
     'call : CALL expression COLON expression LPAREN RPAREN'
-    pass  # wait
+    p[0] = Call(p[2], p[4], None)
 
 
 def p_seq(p):
@@ -694,20 +708,20 @@ def p_primop_empty(p):
 
 parser = yacc.yacc()
 
-# str = "examples/concdb.core"
-# str = "examples/finite_leader.core"
-# str = "examples/firewall.core"
-# str = "examples/howait.core"
-# str = "examples/parikh.core"
-# str = "examples/pipe.core"
-# str = "examples/race.core"
-# str = "examples/reslock.core"
-# str = "examples/ring.core"
-# str = "examples/safe_send.core"
-# str = "examples/sieve.core"
-# str = "examples/state_factory.core"
-# str = "examples/stutter.core"
-str = "examples/unsafe_send.core"
-filein = open(str)
+# filename = "examples/concdb.core"
+# filename = "examples/finite_leader.core"
+# filename = "examples/firewall.core"
+# filename = "examples/howait.core"
+# filename = "examples/parikh.core"
+# filename = "examples/pipe.core"
+# filename = "examples/race.core"
+# filename = "examples/reslock.core"
+# filename = "examples/ring.core"
+# filename = "examples/safe_send.core"
+# filename = "examples/sieve.core"
+# filename = "examples/state_factory.core"
+# filename = "examples/stutter.core"
+filename = "examples/unsafe_send.core"
+filein = open(filename)
 data = filein.read()
 result = parser.parse(data, lexer=lexer)
