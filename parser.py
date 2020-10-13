@@ -208,11 +208,11 @@ def p_moduleattributes_combine(p):
 
 def p_modulebody(p):
     'modulebody : functiondefines'
-    for fun in p[1]:
-        fn = fun.function_name
+    for fundefine in p[1]:
+        fn = fundefine.function_name
         if "\'module_info\'" != fn.name:
-            print(fn.name + " " + str(fn.lineno))
-            local_functions.append(fn)
+            print(fn.name + " LINE: " + str(fn.lineno))
+            local_functions.setdefault(fn.name, fundefine.fun)
     pass
 
 # Atomic literal: integer, atom, nil, char and string
@@ -336,12 +336,11 @@ def p_functiondefines_combine(p):
     'functiondefines : functiondefines functiondefine'
     p[0] = p[1]
     p[0].append(p[2])
-    pass
 
 
 def p_functiondefine(p):
     'functiondefine : afunctionname EQUAL afun'
-    p[0] = FunctionDefine(p[1])
+    p[0] = FunctionDefine(p[1], p[3])
 
 
 def p_afunctionname_notannotated(p):
@@ -400,12 +399,12 @@ def p_expressions_combine(p):
 
 def p_valuelist_notempty(p):
     'valuelist : LABRACK asingleexpressions RABRACK'
-    pass  # wait
+    p[0] = p[2]
 
 
 def p_valuelist_empty(p):
     'valuelist : LABRACK RBRACK'
-    pass  # wait
+    p[0] = []
 
 
 def p_asingleexpressions_one(p):
@@ -511,14 +510,10 @@ def p_tuple_empty(p):
 
 def p_let(p):
     'let : LET vars EQUAL expression IN expression'
-    # gvt.begin_scope()
-    # if len(p[2]) > 1:
-    #     print("error: more than one var in let")
-    # varname = p[2][0]
-    # gvt.cur_var_table[varname] = Variable(varname, p[4], False)
-    # do_expression(p[6])
-    # gvt.end_scope()
-    pass
+    if len(p[2]) > 1:
+        print("error: more than one var in let")
+    p[0] = Let(p[2][0], p[4], p[6])
+
 
 def p_list_nobar(p):
     'list : LBRACK expressions RBRACK'
@@ -532,22 +527,22 @@ def p_list_withbar(p):
 
 def p_application_notempty(p):
     'application : APPLY expression LPAREN expressions RPAREN'
-    pass  # wait
+    p[0] = Application(p[2], p[4])
 
 
 def p_application_empty(p):
     'application : APPLY expression LPAREN RPAREN'
-    pass  # wait
+    p[0] = Application(p[2], [])
 
 
 def p_fun(p):
     'fun : FUN LPAREN avarnames RPAREN ARROW expression'
-    pass  # wait
+    p[0] = Fun(p[3], p[6])
 
 
 def p_fun_empty(p):
     'fun : FUN LPAREN RPAREN ARROW expression'
-    pass  # wait
+    p[0] = Fun([], p[5])
 
 
 def p_apattern_var(p):
@@ -649,31 +644,33 @@ def p_guard(p):
 
 def p_aclause_noa(p):
     'aclause : clause'
-    pass  # wait
+    p[0] = p[1]
 
 
 def p_aclause_witha(p):
     'aclause : LPAREN clause ANNOTATION LBRACK constants RBRACK RPAREN'
+    p[0] = p[2]
 
 
 def p_case(p):
     'case : CASE expression OF aclauses END'
-    pass  # wait
+    p[0] = Case(p[2], p[4])
 
 
 def p_aclauses_once(p):
     'aclauses : aclause'
-    pass  # wait
+    p[0] = [p[1]]
 
 
 def p_aclauses_combine(p):
     'aclauses : aclauses aclause'
-    pass  # wait
+    p[0] = p[1]
+    p[0].append(p[2])
 
 
 def p_receive(p):
     'receive : RECEIVE aclauses timeout'
-    pass  # wait
+    p[0] = Receive(p[2])
 
 
 def p_timeout(p):
@@ -693,7 +690,7 @@ def p_call_empty(p):
 
 def p_seq(p):
     'seq : DO expression expression'
-    pass  # wait
+    p[0] = Sequencing(p[2], p[3])
 
 
 def p_primop_notempty(p):
